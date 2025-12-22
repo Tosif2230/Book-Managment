@@ -1,33 +1,44 @@
-import { useState } from "react";
-import { Books } from "../utils/mockData";
+import { useEffect, useState } from "react";
 import Book from "./Book";
 import Search from "./Search";
 import { Link } from "react-router-dom";
 
 function Booklist() {
-  const [filteredBooks, setfilteredBooks] = useState(Books);
+  const [filteredBooks, setFilteredBooks] = useState([]);
 
-  function fileterSearchList(filteredSearchBooks) {
-    setfilteredBooks(filteredSearchBooks);
+  function filterSearchList(filteredSearchBooks) {
+    setFilteredBooks(filteredSearchBooks);
   }
+
+  useEffect(() => {
+    async function fetchData() {
+      const resp = await fetch("https://raw.githubusercontent.com/tosif2230/Dummy-Books-API/main/books.json");
+      const data = await resp.json();
+      setFilteredBooks(data);
+    }
+    fetchData();
+  }, []);
 
   return (
     <>
-      <Search filterFunction={fileterSearchList} />
-      
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}>
-          {filteredBooks.map((book) => (
-            <Link to={`/book/${book.id}`}>
-            <Book key={book.id} bookDetails={book} /> 
-            </Link>
-          ))}
-        </div>
+      <Search filterFunction={filterSearchList} />
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        {Array.isArray(filteredBooks) &&
+  filteredBooks.map(book => (
+    <Link key={book.id} to={`/book/${book.id}`}>
+      <Book bookDetails={book} />
+    </Link>
+))}
+
+      </div>
     </>
   );
 }
